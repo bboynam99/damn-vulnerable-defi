@@ -88,6 +88,5 @@ describe('[Challenge] The rewarder', function () {
         // Rewards must have been issued to the attacker account
         expect(await this.rewardToken.totalSupply()).to.be.bignumber.gt(ether('100'));
         expect(await this.rewardToken.balanceOf(attacker)).to.be.bignumber.gt('0');
-        console.log(parseInt(await this.rewardToken.balanceOf(attacker)));
     });
 });
