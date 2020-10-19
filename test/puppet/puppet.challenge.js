@@ -13,12 +13,11 @@ contract.artifactsDir = 'build/contracts';
 const DamnValuableToken = contract.fromArtifact('DamnValuableToken');
 const PuppetPool = contract.fromArtifact('PuppetPool');
 
-
 // Calculates how much ETH (in wei) Uniswap will pay for the given amount of tokens
 function calculateTokenToEthInputPrice(tokensSold, tokensInReserve, etherInReserve) {
     return tokensSold.mul(new BN('997')).mul(etherInReserve).div(
         (tokensInReserve.mul(new BN('1000')).add(tokensSold.mul(new BN('997'))))
-    )
+    );
 }
 
 describe('[Challenge] Puppet', function () {
@@ -38,11 +37,11 @@ describe('[Challenge] Puppet', function () {
         this.token = await DamnValuableToken.new({ from: deployer });
 
         // Deploy a exchange that will be used as the factory template
-        this.exchangeTemplate = await UniswapExchange.new({from: deployer});
+        this.exchangeTemplate = await UniswapExchange.new({ from: deployer });
 
         // Deploy factory, initializing it with the address of the template exchange
         this.uniswapFactory = await UniswapFactory.new({ from: deployer });
-        await this.uniswapFactory.initializeFactory(this.exchangeTemplate.address, {from: deployer});
+        await this.uniswapFactory.initializeFactory(this.exchangeTemplate.address, { from: deployer });
 
         // Create a new exchange for the token, and retrieve the deployed exchange's address
         const { logs } = await this.uniswapFactory.createExchange(this.token.address, { from: deployer });
@@ -54,7 +53,7 @@ describe('[Challenge] Puppet', function () {
             this.uniswapExchange.address,
             { from: deployer }
         );
-    
+
         // Add initial token and ETH liquidity to the pool
         await this.token.approve(
             this.uniswapExchange.address,
@@ -97,7 +96,7 @@ describe('[Challenge] Puppet', function () {
 
     after(async function () {
         /** SUCCESS CONDITIONS */
-        
+
         // Attacker has stolen all tokens from the pool
         expect(
             await this.token.balanceOf(attacker)
@@ -105,7 +104,7 @@ describe('[Challenge] Puppet', function () {
         expect(
             await this.token.balanceOf(this.lendingPool.address)
         ).to.be.bignumber.eq('0');
-        
+
         // Attacker ETH balance has not decreased
         expect(
             await balance.current(attacker)
